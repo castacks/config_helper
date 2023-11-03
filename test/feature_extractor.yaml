@@ -1,0 +1,7 @@
+model:
+  init_args:
+    feature_extractor:
+      class_path: path.to.feature_extractor.class
+      init_args:
+        in_size: [512, 2048]
+        in_chs: 3

@@ -1,0 +1,4 @@
+sweep@batch_size: 32
+sweep@lr: 0.0001
+
+fit.model.init_args.feature_extractor: "model.init_args.feature_extractor@feature_extractor.yaml"
