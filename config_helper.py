@@ -364,7 +364,6 @@ def construct_config_on_filesystem(
     # Gather all the name_config_base arguments.
     config_base = read_and_merge_base_config_files(argv, name_config_base)
     
-    import ipdb; ipdb.set_trace()
     # Merge all the name_config_sweep arguments.
     config_sweep, sweep_at_entries = read_and_merge_sweep_config_files(argv, name_config_sweep)
     

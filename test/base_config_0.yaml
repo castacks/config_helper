@@ -12,3 +12,7 @@ fit:
     class_path: path.to.model.class
     init_args:
       feature_extractor: null
+      classifier:
+        class_path: path.to.classifier.class
+        init_args:
+          in_chs: "sweep@in_chs"

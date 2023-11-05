@@ -1,4 +1,5 @@
 sweep@batch_size: 1
+sweep@in_chs: 1
 
 fit.model.init_args.feature_extractor: "model.init_args.feature_extractor@feature_extractor.yaml"
 fit.data: "special_dataset.yaml"

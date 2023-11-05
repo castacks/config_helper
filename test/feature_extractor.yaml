@@ -4,4 +4,4 @@ model:
       class_path: path.to.feature_extractor.class
       init_args:
         in_size: [512, 2048]
-        in_chs: 3
+        in_chs: "sweep@in_chs"

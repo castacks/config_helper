@@ -6,8 +6,8 @@ import sys
 _CURRENT_PATH       = os.path.dirname(os.path.realpath(__file__))
 _TOP_PATH           = os.path.join(_CURRENT_PATH, '..')
 sys.path.insert( 0, _TOP_PATH )
-for i, p in enumerate(sys.path):
-    print(f'{i}: {p}')
+# for i, p in enumerate(sys.path):
+#     print(f'{i}: {p}')
 
 from config_helper import (
     construct_config_on_filesystem,
