@@ -2,16 +2,19 @@ fit:
   data:
     class_path: path.to.datamodule.class
     init_args:
-      batch_size: 1
-      drop_last: false
+      batch_size: 32
+      drop_last: true
       num_workers: 4
-      path: /path/to/special/dataset
+      path: /path/to/dataset
       pin_memory: true
-      shuffle: false
-      special_arg: special_value
+      shuffle: true
   model:
     class_path: path.to.model.class
     init_args:
+      classifier:
+        class_path: path.to.classifier.class
+        init_args:
+          in_chs: 3
       feature_extractor:
         class_path: path.to.feature_extractor.class
         init_args:

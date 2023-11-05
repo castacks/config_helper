@@ -130,42 +130,50 @@ a __rule of thumb: do not use a sweep variable to specify an embedded configurat
 
 # Example
 
-The best way to illustrate how config_helper works is by using an example. We have a set of simple configuration files in the [test](test) folder. To run the example, do
+The best way to illustrate how config_helper works is by using an example. We have a set of 
+simple configuration files in the [test](test) folder. These configurations represent a typical 
+scenario where a deep-learning model goes through training and validation separately with 
+different settings. To run the example, do
 
 ```bash
 cd <test>
+
+python3 test_main.py \
+    --config_base base_config_0.yaml \
+    --config_base base_config_1.yaml \
+    --config_sweep sweep_config_0.yaml \
+    --config_name ./training_config.yaml
+
 python3 test_main.py \
     --config_base base_config_0.yaml \
     --config_base base_config_1.yaml \
     --config_sweep sweep_config_0.yaml \
     --config_sweep sweep_config_1.yaml \
     --config_sweep sweep_config_2.yaml \
-    --config_name ./composed_config.yaml
+    --config_name ./validation_config.yaml
 ```
 
-The output from the terminal is as follows
+To illustrate what happens when we run the example, we use an image to show the relationship among 
+all the input configuration files and the final configurations that get generated for different 
+purposes. On a high level, key events are marked on the image and listed as follows:
 
-```
-Key override (0) at sweep@batch_size. 
-Key override (1) at fit.model.init_args.feature_extractor.class_path. 
-Key override (2) at fit.model.init_args.feature_extractor.init_args.in_size. 
-Key override (3) at fit.model.init_args.feature_extractor.init_args.in_chs. 
-Key override (4) at fit.data.init_args.drop_last. 
-Key override (5) at fit.model.init_args.feature_extractor. 
-Key override (6) at fit.data.class_path. 
-Key override (7) at fit.data.init_args.path. 
-Key override (8) at fit.data.init_args.batch_size. 
-Key override (9) at fit.data.init_args.num_workers. 
-Key override (10) at fit.data.init_args.pin_memory. 
-Key override (11) at fit.data.init_args.drop_last. 
-Key override (12) at fit.data.init_args.shuffle. 
-Value sweeped at fit.data.init_args.batch_size with sweep@batch_size. 
-Value sweeped at fit.optimizer.init_args.lr with sweep@lr. 
-{'fit': {'data': {'class_path': 'path.to.datamodule.class', 'init_args': {'batch_size': 1, 'drop_last': False, 'num_workers': 4, 'path': '/path/to/special/dataset', 'pin_memory': True, 'shuffle': False, 'special_arg': 'special_value'}}, 'model': {'class_path': 'path.to.model.class', 'init_args': {'feature_extractor': {'class_path': 'path.to.feature_extractor.class', 'init_args': {'in_chs': 3, 'in_size': [512, 2048]}}}}, 'optimizer': {'class_path': 'Adam', 'init_args': {'lr': 0.0001}}}}
-```
+- Different sets of configuration files are used for training (1) and validation (2).
+- Base configurations are merged before sweeping and embedding (3).
+- Sweep configurations are merged before sweeping (4).
+- A sweep variable make different keys share the same value (5, in_chs).
+- A key chain overrides a specific key-value pair (6, feature_extractor, data for validation).
+- Sweep can be done using embedded configuration (7).
+- An embedded configuration is first expanded (8) before merging (9) with other configuration.
+- New key-value pair can be added by merging (10).
 
-To illustrate what happens when we run the test, we use an image to show the relationship among all the input configuration files and the final configuration that get generated.
+![example](./doc/example.png)
 
+In this example, for training, the `batch_size` is set to be 32 and `in_chs` is 3. For 
+validation, we use a new dataset path with a new variable `special_arg`, `batch_size` = 1, 
+`in_chs` = 1, and `drop_last` = False. By having this configuration hierachy, if the developer 
+wants to change the model specification in the base configuration, e.g., the `classifier`. Then 
+all future validation will automatically have this change without changing the confiugration set 
+up.
 
 # Contact
 
