@@ -15,7 +15,7 @@ A great use case for our research activities is to have a base configuration for
 neural network. Then during testing, we can have different configurations, e.g., when the dataset
 changes, by only augmenting the relevant parts, keeping all other training settings unchanged. When
 we decide to change some training parameters that are in the base configuration, the changes will be
-automatically reflected during testing, as long as these parameters are not override in the
+automatically reflected during testing, as long as these parameters are not overridden in the
 augmented configuration. 
 
 Certain functionalities of this package are inspired by the initial codes done by Conner Pulling
@@ -54,7 +54,7 @@ Their usage is described later. Use `--config_name` to specify a file path for s
 
 ## Types of configuration files
 
-All configuration files should be in YAML format. There are two type of configuration files handled
+All configuration files should be in YAML format. There are two types of configuration files handled
 by this package:
 
 - __Base configuration:__ Ordinary YAML files with normal content.
@@ -62,7 +62,7 @@ by this package:
 
 Here we have two types of keywords:
 
-- __Sweep variable__: A keyword starts with `sweep@`. Its value is used to update values of
+- __Sweep variable__: A keyword starts with `sweep@`. Its value is used to update the values of
   DIFFERENT keys.
 - __Key chain__: A keyword represented as a string in the format of `key0.key1.key2`. Its value is
   used to update a SPECIFIC key.
@@ -70,8 +70,8 @@ Here we have two types of keywords:
 ## Combine the configurations
 
 The final configuration can be constructed from multiple base configurations and multiple/zero sweep
-configurations. The use use the `--base_config` and `--sweep_config` commands to specify them. On
-the command line. All base configurations will be merged. The order of the configurations appear in
+configurations. The user uses the `--base_config` and `--sweep_config` commands to specify them on
+the command line. All base configurations will be merged. The order of the configurations that appear in
 the command line is important. During merging, the later configurations will override the earlier
 ones if there is a key conflict. Similarly, all the sweep configurations are also merged in order.
 
@@ -121,7 +121,7 @@ configuration. The prefix `key0.key1@` is optional. If it is present, then only 
 Embedded configuration is expanded recursively such that there can be multiple levels of embedding.
 
 Sweep variables can be used in any level of embedded configuration. Since variable sweeping happens
-after key chain override, the user can also use embedded configuration in the sweep configuration as
+after key chain override, the user can also use an embedded configuration in a sweep configuration as
 the value of a key chain.
 
 Note: a potential issue is that when a sweep variable points to an embedded configuration file,
@@ -155,25 +155,26 @@ python3 test_main.py \
 
 To illustrate what happens when we run the example, we use an image to show the relationship among 
 all the input configuration files and the final configurations that get generated for different 
-purposes. On a high level, key events are marked on the image and listed as follows:
+purposes. On a high level, key events are marked on the image and listed as follows (Click the image for the original resolution):
 
 - Different sets of configuration files are used for training (1) and validation (2).
 - Base configurations are merged before sweeping and embedding (3).
 - Sweep configurations are merged before sweeping (4).
-- A sweep variable make different keys share the same value (5, in_chs).
+- A sweep variable makes different keys share the same value (5, in_chs).
 - A key chain overrides a specific key-value pair (6, feature_extractor, data for validation).
 - Sweep can be done using embedded configuration (7).
-- An embedded configuration is first expanded (8) before merging (9) with other configuration.
-- New key-value pair can be added by merging (10).
+- An embedded configuration is first expanded (8) before merging (9) with another configuration.
+- A new key-value pair can be added by merging (10).
 
 ![example](./doc/example.png)
 
-In this example, for training, the `batch_size` is set to be 32 and `in_chs` is 3. For 
+In this example, for training, the `batch_size` is set to 32 and `in_chs` is 3. For 
 validation, we use a new dataset path with a new variable `special_arg`, `batch_size` = 1, 
-`in_chs` = 1, and `drop_last` = False. By having this configuration hierachy, if the developer 
+`in_chs` = 1, and `drop_last` = False. By having this configuration hierarchy, if the developer 
 wants to change the model specification in the base configuration, e.g., the `classifier`. Then 
-all future validation will automatically have this change without changing the confiugration set 
+all future validation will automatically have this change without changing the configuration set 
 up.
 
 # Contact
 
+Yaoyu Hu
