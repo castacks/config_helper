@@ -86,6 +86,30 @@ def separate_dict_key_chain_prefix(s):
     else:
         return None, s
 
+def parse_yaml_filename(fn):
+    '''Check if fn is ending with ".yaml" or ".yaml@xxx@yyy". Where the "@xxx" suffix is optional and
+       "xxx" must not be ".yaml".
+       
+       If the test passes, then the function returns the valid filename after removing the
+       "@xxx@yyy" suffix. All the detected suffixes will be returned in a seprate list.
+       
+       If the test fails, then this function returns None and []. 
+    '''
+    
+    lower_fn = fn.lower()
+    
+    # Check bare ".yaml" suffix.
+    if lower_fn.endswith(".yaml"):
+        return fn, []
+    
+    # Check ".yaml@xxx@yyy" suffix.
+    m = re.search(r'(.+\.yaml)(@.+)', lower_fn)
+    
+    if m:
+        return m[1], m[2].split('@')[1:]
+    
+    return None, []
+
 def substitute_config_yaml(d):
     '''Go through dictionary d and replace any value that is a string and ends with ".yaml" with the
     content read from the yaml file. If the yaml file also contains embedded yaml file names, then
@@ -96,9 +120,11 @@ def substitute_config_yaml(d):
     Arguments:
     d (dict): a dictionary represent a configuration. Will be modified in-place.
     '''
-    for k, v in d.items():
-        if isinstance(v, str) and v.lower().endswith(".yaml"):
-            d[k] = read_config(v, recursive=True)
+    for k, v in d.items():    
+        if isinstance(v, str):
+            fn, _ = parse_yaml_filename(v)
+            if fn is not None:
+                d[k] = read_config(fn, recursive=True)
         elif isinstance(v, dict):
             substitute_config_yaml(v)
 
@@ -171,11 +197,15 @@ def merge_dicts( d_to, d_from, path=[] ):
     Inspired by https://gist.github.com/angstwad/bf22d1822c38a92ec0a9 and
     https://stackoverflow.com/questions/7204805/how-to-merge-dictionaries-of-dictionaries?page=1&tab=scoredesc#tab-top
     
-    Merge from d_from to d_to. If there is a key conflict, then the values are merged in the following logic:
-    - If either of the values is a string ending with ".yaml", then the value will be replaced by reading 
-      the yaml file without recursive parsing.
+    Merge from d_from to d_to. If there is a key conflict, then the values are merged in the
+    following logic:
+    - If either of the values is a string ending with ".yaml", then the value will be replaced by
+      reading the yaml file without recursive parsing.
+    - If either of the values is a string ending with ".yaml@deferred_merge", then the yaml file
+      will NOT be read. The filename is used as normal string.
     - If both values (after potential YAML file parsing) are dictionaries, then the values will be
-      merged. Otherwise (*), d_from's value will be used and a message will be printed to the terminal.
+      merged. Otherwise (*), d_from's value will be used and a message will be printed to the
+      terminal.
     
     Note: d_to is updated in-place and the function also returns the final, modified d_to.
     Note: every time an override (*) happens, there will be a counter number associated with the
@@ -189,12 +219,16 @@ def merge_dicts( d_to, d_from, path=[] ):
     
     for key, value in d_from.items():
         if key in d_to: 
-            if isinstance(value, str) and value.endswith('.yaml'):
-                value = read_config(value, recursive=False)
+            if isinstance(value, str):
+                fn, suffixes = parse_yaml_filename(value)
+                if fn is not None and 'deferred_merge' not in suffixes:
+                    value = read_config(fn, recursive=False)
             
             value_to_ori = d_to[key]
-            if isinstance(value_to_ori, str) and value_to_ori.endswith('.yaml'):
-                d_to[key] = read_config(value_to_ori, recursive=False)
+            if isinstance(value_to_ori, str) and isinstance(value, dict):
+                fn, _ = parse_yaml_filename(value_to_ori)
+                if fn is not None:
+                    d_to[key] = read_config(value_to_ori, recursive=False)
             
             if isinstance(value, dict) and isinstance(d_to[key], dict):
                 merge_dicts(d_to[key], value, path + [str(key)])
