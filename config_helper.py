@@ -199,10 +199,8 @@ def merge_dicts( d_to, d_from, path=[] ):
     
     Merge from d_from to d_to. If there is a key conflict, then the values are merged in the
     following logic:
-    - If either of the values is a string ending with ".yaml", then the value will be replaced by
+    - If the value of d_from is a string ending with ".yaml@merge", then the value will be replaced by
       reading the yaml file without recursive parsing.
-    - If either of the values is a string ending with ".yaml@deferred_merge", then the yaml file
-      will NOT be read. The filename is used as normal string.
     - If both values (after potential YAML file parsing) are dictionaries, then the values will be
       merged. Otherwise (*), d_from's value will be used and a message will be printed to the
       terminal.
@@ -221,7 +219,7 @@ def merge_dicts( d_to, d_from, path=[] ):
         if key in d_to: 
             if isinstance(value, str):
                 fn, suffixes = parse_yaml_filename(value)
-                if fn is not None and 'deferred_merge' not in suffixes:
+                if fn is not None and 'merge' in suffixes:
                     value = read_config(fn, recursive=False)
             
             value_to_ori = d_to[key]
